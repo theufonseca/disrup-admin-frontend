@@ -35,6 +35,13 @@ export const store = createStore<Estado>({
     }
   },
   actions: {
+    'UPDATE_STATUS_COMPANY'(context, { companyId, newStatus}) {
+      httpClient.put('api/company/status', 
+      { 
+        companyId,
+        newStatus
+      }).then(response => console.log(response.data))
+    },
     'GET_COMPANIES'({commit}) {
       httpClient.get('api/Company/all')
         .then(resposta => {
@@ -103,7 +110,7 @@ export const store = createStore<Estado>({
           console.log(response)
           commit('REMOVE_COMPANY', id)
         });
-    }
+    },
   },
   modules: {
   }

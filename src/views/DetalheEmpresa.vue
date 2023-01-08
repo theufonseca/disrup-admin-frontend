@@ -72,6 +72,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="columns">
+                        <div class="column is-3" style="text-align: left">
+                            <span :class="statusClass[companyData?.status as CompanyStatus]">{{getStatusName(companyData?.status || 0)}}</span>
+                        </div>
+                        <div class="column is-6" style="text-align: right; margin-left: 15px;" v-if="companyData?.status !== 0">
+                            <button class="button is-primary" @click="approveCompany">Ativar</button>
+                        </div>
+                        <div class="column is-6" style="text-align: right; margin-left: 15px;" v-if="companyData?.status === 0">
+                            <button class="button is-danger" @click="inativeCompany">Inativar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,6 +97,7 @@ import { storeKey } from 'vuex';
 import ICompany from '@/interfaces/ICompany';
 import { tSExpressionWithTypeArguments } from '@babel/types';
 import IPhotoUpload from '@/interfaces/IPhotoUpload';
+import { CompanyStatus, GetStatusCompany } from '@/enums/company-status';
 
 export default defineComponent({
     name: 'detalheEmpresa',
@@ -95,6 +107,9 @@ export default defineComponent({
         }
     },
     methods: {
+        getStatusName(status: number) : string {
+            return GetStatusCompany(status)
+        },
         deleteCompany() {
             this.store.dispatch('DELETE_COMPANY', this.companyData?.id)
             this.$router.push('/')
@@ -115,12 +130,33 @@ export default defineComponent({
             this.store.commit('CLEAN_COMPANY')
             this.store.dispatch('GET_COMPANY', this.id)
             this.$router.push(`/empresa/detalhe/${this.id}`)
+        },
+        approveCompany() {
+            const payload = {
+                companyId: this.id,
+                newStatus: CompanyStatus.ACTIVE
+            }
+
+            this.store.dispatch('UPDATE_STATUS_COMPANY', payload)
+        },
+        inativeCompany() {
+            const payload = {
+                companyId: this.id,
+                newStatus: CompanyStatus.INACTIVE
+            }
+
+            this.store.dispatch('UPDATE_STATUS_COMPANY', payload)
         }
     },
     data() {
         return {
             thumbDefault: "https://storage.googleapis.com/teste8-182316.appspot.com/default-thumb.png",
-            fileName: ""
+            fileName: "",
+            statusClass: {
+                [CompanyStatus.ACTIVE]: 'tag is-success',
+                [CompanyStatus.INACTIVE]: 'tag is-danger',
+                [CompanyStatus.PENDING_APPROVAL]: 'tag is-warning',
+            },
         }
     },
     components: {
